@@ -1,10 +1,9 @@
 import requests
 import subprocess
 import tempfile
-import shutil
-import argparse
 import os
 import pandas as pd
+
 
 GITHUB_API = "https://api.github.com"
 
@@ -33,7 +32,9 @@ def get_contributors(owner, repo):
     return contributors
 
 
-def clone_repo(repo_url):
+def clone_repo(owner, repo):
+    repo_url = f"https://github.com/{owner}/{repo}.git"
+    print(repo_url)
     temp_dir = tempfile.mkdtemp()
     subprocess.run(
         ["git", "clone", "--depth", "1000", repo_url, temp_dir],
@@ -82,44 +83,3 @@ def get_commits_per_week(repo_path):
     commits_per_week = df.groupby("week").size()
 
     return commits_per_week
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Analyze a public GitHub repository")
-    parser.add_argument("repo", help="Repository in format owner/repo")
-    args = parser.parse_args()
-
-    owner, repo = args.repo.split("/")
-    repo_url = f"https://github.com/{owner}/{repo}.git"
-
-    repo_info = get_repo_info(owner, repo)
-
-    contributors = get_contributors(owner, repo)
-
-    repo_path = clone_repo(repo_url)
-
-    total_lines, language_stats = count_lines_of_code(repo_path)
-
-    commits_per_week = get_commits_per_week(repo_path)
-
-    shutil.rmtree(repo_path)
-
-    print("\n===== Repository Analysis =====")
-    for key, value in repo_info.items():
-        if key == "owner" or key == "license":
-            continue
-        print(f"    {key} => {value}")
-
-    print(f"\nTotal Contributors: {len(contributors)}")
-    print(f"Total Lines of Code: {total_lines}")
-
-    print("\nLines by Language:")
-    for lang, lines in language_stats.items():
-        print(f"  {lang}: {lines}")
-
-    print("\nCommits per Week:")
-    print(commits_per_week)
-
-
-if __name__ == "__main__":
-    main()
