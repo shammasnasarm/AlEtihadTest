@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Dashboard</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .job { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; }
+        a { text-decoration: none; color: blue; }
+    </style>
+</head>
+<body>
+
+<h2>Job Scraper Dashboard</h2>
+
+<form method="POST">
+    <input type="text" name="query" placeholder="Job title" required>
+    <button type="submit">Search</button>
+</form>
+
+<p>
+    <strong>Total Jobs:</strong> {{ stats.total }} &nbsp;|&nbsp;
+    <strong>Posted Today:</strong> {{ stats.posted_today }} &nbsp;|&nbsp;
+    <strong>Expiring in 7 Days:</strong> {{ stats.expiring_soon }}
+</p>
+
+<hr>
+
+{% for job in jobs %}
+<div class="job">
+    <h3>{{ job.title }}</h3>
+    <p><strong>Company:</strong> {{ job.company }}</p>
+    <p><strong>Posted:</strong> {{ job.posted }}</p>
+    <p><strong>Last Date to Apply:</strong> {{ job.last_date }}</p>
+    <p><strong>Skills:</strong> {{ job.skills | join(", ") }}</p>
+    <a href="{{ job.link }}" target="_blank">View Job Details</a>
+</div>
+{% endfor %}
+
+</body>
+</html>
