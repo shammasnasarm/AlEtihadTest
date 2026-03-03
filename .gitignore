@@ -2,3 +2,4 @@ venv
 transactions.json
 __pycache__
 *.pyc
+*.db
