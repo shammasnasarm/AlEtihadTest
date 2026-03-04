@@ -1,5 +1,5 @@
-import os
 import argparse
+from pathlib import Path
 
 from utils import organize_by_type, organize_by_date, organize_by_custom
 
@@ -15,10 +15,10 @@ def main():
     )
     args = parser.parse_args()
 
-    folder_path = args.folder
+    folder_path = Path(args.folder)
     mode = args.mode
 
-    if not os.path.isdir(folder_path):
+    if not folder_path.is_dir():
         print("----Invalid folder path!----")
         return
 

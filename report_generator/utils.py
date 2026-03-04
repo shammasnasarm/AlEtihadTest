@@ -1,5 +1,4 @@
 import os
-import json
 import pandas as pd
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
@@ -12,8 +11,8 @@ from constants import OUTPUT_FOLDER
 
 def load_data(file_path):
     if file_path.endswith(".json"):
-        with open(file_path, "r") as f:
-            return json.load(f)
+        df = pd.read_json(file_path)
+        return df.to_dict(orient="records")
 
     elif file_path.endswith(".csv"):
         df = pd.read_csv(file_path)
