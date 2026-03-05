@@ -1,64 +1,73 @@
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+
 from fastapi import FastAPI, Depends
-from sqlalchemy.orm import Session
-from config.database import SessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
+from config.database import AsyncSessionLocal, engine, Base
 from app import schemas
 from app.repositories import BookRepository, MemberRepository, CheckoutRepository
 
-app = FastAPI(title="Library API with Repository + Alembic")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
 
 
-def get_db():
-    db = SessionLocal()
-    try:
+app = FastAPI(title="Library API with Repository", lifespan=lifespan)
+
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
 
 @app.post("/books")
-def create_book(data: schemas.BookCreate, db: Session = Depends(get_db)):
-    return BookRepository(db).create(data)
+async def create_book(data: schemas.BookCreate, db: AsyncSession = Depends(get_db)):
+    return await BookRepository(db).create(data)
 
 
 @app.get("/books")
-def list_books(db: Session = Depends(get_db)):
-    return BookRepository(db).list()
+async def list_books(db: AsyncSession = Depends(get_db)):
+    return await BookRepository(db).list()
 
 
 @app.get("/books/{book_id}")
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    return BookRepository(db).get(book_id)
+async def get_book(book_id: int, db: AsyncSession = Depends(get_db)):
+    return await BookRepository(db).get(book_id)
 
 
 @app.post("/members")
-def create_member(data: schemas.MemberCreate, db: Session = Depends(get_db)):
-    return MemberRepository(db).create(data)
+async def create_member(data: schemas.MemberCreate, db: AsyncSession = Depends(get_db)):
+    return await MemberRepository(db).create(data)
 
 
 @app.get("/members")
-def list_members(db: Session = Depends(get_db)):
-    return MemberRepository(db).list()
+async def list_members(db: AsyncSession = Depends(get_db)):
+    return await MemberRepository(db).list()
 
 
 @app.get("/members/{member_id}")
-def get_member(member_id: int, db: Session = Depends(get_db)):
-    return MemberRepository(db).get(member_id)
+async def get_member(member_id: int, db: AsyncSession = Depends(get_db)):
+    return await MemberRepository(db).get(member_id)
 
 
 @app.post("/checkout")
-def checkout_book(data: schemas.CheckoutCreate, db: Session = Depends(get_db)):
-    return CheckoutRepository(db).checkout_book(data)
+async def checkout_book(data: schemas.CheckoutCreate, db: AsyncSession = Depends(get_db)):
+    return await CheckoutRepository(db).checkout_book(data)
 
 
 @app.get("/checkout/{checkout_id}")
-def get_checkout(checkout_id: int, db: Session = Depends(get_db)):
-    return CheckoutRepository(db).get(checkout_id)
+async def get_checkout(checkout_id: int, db: AsyncSession = Depends(get_db)):
+    return await CheckoutRepository(db).get(checkout_id)
 
 
 @app.get("/checkout")
-def list_checkouts(db: Session = Depends(get_db)):
-    return CheckoutRepository(db).list()
+async def list_checkouts(db: AsyncSession = Depends(get_db)):
+    return await CheckoutRepository(db).list()
+
 
 @app.post("/return/{checkout_id}")
-def return_book(checkout_id: int, db: Session = Depends(get_db)):
-    return CheckoutRepository(db).return_book(checkout_id)
+async def return_book(checkout_id: int, db: AsyncSession = Depends(get_db)):
+    return await CheckoutRepository(db).return_book(checkout_id)

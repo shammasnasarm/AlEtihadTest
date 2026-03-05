@@ -73,7 +73,7 @@ pip install -r requirements.txt
 ### Running the Application
 
 ```bash
-uvicorn main:app --reload
+uvicorn main:app
 ```
 
 Open:
